@@ -1,0 +1,20 @@
+<<<<<<< HEAD
+/.launches/
+/.settings/
+/Debug/
+/targetConfigs/
+*.ccsproject
+*.project
+*.cproject
+*lnk_msp*
+=======
+*.ccsproject
+*.cproject
+*.launches/
+*.project
+*.settings/
+Debug/
+targetConfigs/
+/Release/
+*.cmd
+>>>>>>> master
