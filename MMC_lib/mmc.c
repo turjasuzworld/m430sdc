@@ -88,6 +88,7 @@ char mmcGoIdle();
 
 // Varialbes
 char mmc_buffer[512] = { 0 };               // Buffer for mmc i/o for data and registers
+unsigned char mmc_cmd8_param[4] = {0x0,0x0,0x1,0xAA};
 
 // Initialize MMC card
 char mmcInit(void)
@@ -105,8 +106,14 @@ char mmcInit(void)
   //         mmcCD         In        0 - card inserted
 
   // Init Port for MMC (default high)
-  MMC_PxOUT |= MMC_SIMO + MMC_UCLK;
-  MMC_PxDIR |= MMC_SIMO + MMC_UCLK;
+  MMC_PxOUT |=  MMC_UCLK;   //P5.5
+  MMC_PxxOUT |= MMC_SIMO;   //P3.7
+  MMC_PxDIR |=  MMC_UCLK;
+  MMC_PxxDIR |= MMC_SIMO ;
+
+  MMC_PxDIR &=  ~MMC_SOMI;  //P5.4
+  MMC_PxOUT |=   MMC_SOMI;
+  MMC_PxREN |=   MMC_SOMI;
 
 
   // Chip Select
@@ -114,7 +121,9 @@ char mmcInit(void)
   MMC_CS_PxDIR |= MMC_CS;
 
   // Card Detect
-  MMC_CD_PxDIR &=  ~MMC_CD;
+  MMC_CD_PxDIR    &=  ~MMC_CD;
+  MMC_CD_PxREN    |=   MMC_CD;
+  MMC_CD_PxOUT    |=   MMC_CD;
   
   // Init SPI Module
   halSPISetup();
@@ -125,6 +134,7 @@ char mmcInit(void)
   MMC_PxxSEL |= MMC_SIMO;
 #endif  
   
+
   //initialization sequence on PowerUp
   CS_HIGH();
   for(i=0;i<=9;i++)
@@ -145,6 +155,15 @@ char mmcGoIdle()
   //Now wait for READY RESPONSE
   if(mmcGetResponse()!=0x01)
     return MMC_INIT_ERROR;
+
+//  while(response==0x01)
+//  {
+//    CS_HIGH();
+//    spiSendByte(DUMMY_CHAR);
+//    CS_LOW();
+//    mmcSendArrCmd(MMC_SEND_VER_COND, &mmc_cmd8_param[0], sizeof(mmc_cmd8_param), 0x87);
+//    response=mmcGetResponse();
+//  }
 
   while(response==0x01)
   {
@@ -358,6 +377,27 @@ void mmcSendCmd (const char cmd, unsigned long data, const char crc)
   spiSendFrame(frame,6);
 }
 
+void mmcSendArrCmd (const char cmd, unsigned char* data, unsigned char length, const char crc)
+{
+    if(length<5)
+    {
+        unsigned char frame[6];
+        static unsigned char lenCtr;
+        int i = 1;
+        lenCtr = length;
+        frame[0]=(cmd|0x40);
+        while(i <= lenCtr)
+        {
+            frame[i]= *data;
+            i++;
+            data++;
+        }
+        frame[5]=(crc);
+        spiSendFrame(frame,6);
+    }
+
+}
+
 
 //--------------- set blocklength 2^n ------------------------------------------------------
 char mmcSetBlockLength (const unsigned long blocklength)
@@ -506,6 +546,10 @@ unsigned long mmcReadCardSize(void)
 
 char mmcPing(void)
 {
+    MMC_CD_PxREN    |=   MMC_CD;
+    MMC_CD_PxOUT    |=   MMC_CD;
+    MMC_CD_PxDIR    &=  ~MMC_CD;
+
   if (!(MMC_CD_PxIN & MMC_CD))
     return (MMC_SUCCESS);
   else

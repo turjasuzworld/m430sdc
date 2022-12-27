@@ -47,6 +47,8 @@
 #define SPI_PxxDIR        P3DIR      // assignments indicated in the
 #define SPI_PxIN          P5IN       // chosen MSP430 device datasheet.
 #define SPI_PxxIN         P3IN
+#define SPI_PxREN         P5REN
+#define SPI_PxxREN        P3REN
 #define SPI_PxOUT         P5OUT
 #define SPI_PxxOUT        P3OUT
 #define SPI_SIMO          BIT7  //P3.7
@@ -57,7 +59,8 @@
 // SPI/UART port selections.  Select which port will be used for the interface 
 //----------------------------------------------------------------------------
 //#define SPI_SER_INTF      SER_INTF_USART1  // Interface to MMC
-#define SPI_SER_INTF      SER_INTF_USCIB1//SER_INTF_BITBANG  // Interface to MMC
+//#define SPI_SER_INTF      SER_INTF_USCIB1   // Interface to MMC
+#define SPI_SER_INTF      SER_INTF_BITBANG  // Interface to MMC
 
 
 /*
@@ -87,12 +90,13 @@
 #define MMC_PxDIR         SPI_PxDIR      // assignments indicated in the
 #define MMC_PxxDIR        SPI_PxxDIR
 #define MMC_PxIN          SPI_PxIN       // chosen MSP430 device datasheet.
-#define MMC_PxxIN          SPI_PxxIN
+#define MMC_PxxIN         SPI_PxxIN
 #define MMC_PxOUT         SPI_PxOUT      
-#define MMC_PxxOUT         SPI_PxxOUT
+#define MMC_PxxOUT        SPI_PxxOUT
 #define MMC_SIMO          SPI_SIMO
 #define MMC_SOMI          SPI_SOMI
 #define MMC_UCLK          SPI_UCLK
+#define MMC_PxREN         SPI_PxREN
 
 // Chip Select
 #define MMC_CS_PxOUT      P3OUT
@@ -100,8 +104,10 @@
 #define MMC_CS            BIT6
 
 // Card Detect
+#define MMC_CD_PxOUT      P9OUT
 #define MMC_CD_PxIN       P9IN
 #define MMC_CD_PxDIR      P9DIR
+#define MMC_CD_PxREN      P9REN
 #define MMC_CD            BIT0
 
 /*
@@ -117,6 +123,6 @@
 */
 
 #define CS_LOW()    MMC_CS_PxOUT &= ~MMC_CS               // Card Select
-#define CS_HIGH()   while(halSPITXDONE); MMC_CS_PxOUT |= MMC_CS  // Card Deselect
+#define CS_HIGH()   while(!halSPITXDONE); MMC_CS_PxOUT |= MMC_CS  // Card Deselect
 
 #define DUMMY_CHAR 0xFF

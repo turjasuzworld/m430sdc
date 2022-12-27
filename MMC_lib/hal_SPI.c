@@ -189,7 +189,7 @@ void halSPISetup(void)
   UCB1CTL1 |= UCSWRST;                      // **Put state machine in reset**
   UCB1CTL0 = UCMST+UCCKPL+UCMSB+UCSYNC;     // 3-pin, 8-bit SPI master
   UCB1CTL1 = UCSSEL_2+UCSWRST;              // SMCLK
-  UCB1BR0 |= 0x02;                          // UCLK/2
+  UCB1BR0 |= 20;                          // UCLK/2
   UCB1BR1 = 0;
 //  UCB1MCTL = 0;
   UCB1CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
@@ -226,13 +226,15 @@ void spi_bitbang_out(unsigned char value)
   {
 
     if(value & 0x80)                        // If bit is high...
-      MMC_PxOUT |= MMC_SIMO;// Set SIMO high...
+      MMC_PxxOUT |= MMC_SIMO;// Set SIMO high...
     else
-      MMC_PxOUT &= ~MMC_SIMO;//Set SIMO low...
+      MMC_PxxOUT &= ~MMC_SIMO;//Set SIMO low...
     value = value << 1;                     // Rotate bits
 
     MMC_PxOUT &= ~MMC_UCLK; // Set clock low
+    __delay_cycles(10);
     MMC_PxOUT |= MMC_UCLK;  // Set clock high
+    __delay_cycles(10);
   }
 }
 
@@ -245,7 +247,9 @@ unsigned char spi_bitbang_in()
   for(y=8;y>0;y--)
   {
     MMC_PxOUT &= ~MMC_UCLK; // Set clock low
+    __delay_cycles(10);
     MMC_PxOUT |= MMC_UCLK;  // Set clock high
+    __delay_cycles(10);
 
     x = x << 1;                             // Rotate bits
     if(MMC_PxIN & MMC_SOMI)                 // If bit is high...
@@ -263,14 +267,15 @@ unsigned char spi_bitbang_inout(unsigned char value)
   for(y=8;y>0;y--)
   {
     if(value & 0x80)                        // If bit is high...
-      MMC_PxOUT |= MMC_SIMO;// Set SIMO high...
+      MMC_PxxOUT |= MMC_SIMO;// Set SIMO high...
     else
-      MMC_PxOUT &= ~MMC_SIMO;//Set SIMO low...
+      MMC_PxxOUT &= ~MMC_SIMO;//Set SIMO low...
     value = value << 1;                     // Rotate bits
 
     MMC_PxOUT &= ~MMC_UCLK; // Set clock low
+    __delay_cycles(10);
     MMC_PxOUT |= MMC_UCLK;  // Set clock high
-
+    __delay_cycles(10);
     x = x << 1;                             // Rotate bits
     if(MMC_PxIN & MMC_SOMI)                 // If bit is high...
       x |= 0x01;                            // input bit high

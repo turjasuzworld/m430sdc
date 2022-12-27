@@ -49,6 +49,7 @@
 // commands: first bit 0 (start bit), second 1 (transmission bit); CMD-number + 0ffsett 0x40
 #define MMC_GO_IDLE_STATE          0x40     //CMD0
 #define MMC_SEND_OP_COND           0x41     //CMD1
+#define MMC_SEND_VER_COND          0x48     //CMD1
 #define MMC_READ_CSD               0x49     //CMD9
 #define MMC_SEND_CID               0x4a     //CMD10
 #define MMC_STOP_TRANSMISSION      0x4c     //CMD12
@@ -82,6 +83,9 @@ char mmcPing(void);
 
 // send command to MMC
 void mmcSendCmd (const char cmd, unsigned long data, const char crc);
+
+// send array command to MMC
+void mmcSendArrCmd (const char cmd, unsigned char* data, unsigned char length, const char crc);
 
 // set MMC in Idle mode
 char mmcGoIdle();

@@ -83,6 +83,18 @@ int main( void )
 {
   WDTCTL = WDTPW + WDTHOLD;
   P9DIR |= BIT7;
+  //Test toggle
+//  P5DIR |= BIT4+BIT5;
+//  P3DIR |= BIT6+BIT7;
+//  P9DIR |= BIT0;
+
+//  while(1)
+//  {
+//      P5OUT ^= (BIT4+BIT5);
+//      P3OUT ^= (BIT6+BIT7);
+//      P9OUT ^= (BIT0+BIT7);
+//      __delay_cycles(1000000);
+//  }
   //Initialisation of the MMC/SD-card
   while (status != 0)                       // if return in not NULL an error did occur and the
                                             // MMC/SD-card will be initialized again 
@@ -101,7 +113,7 @@ int main( void )
   // Read the Card Size from the CSD Register
   cardSize =  mmcReadCardSize();
     
-// Clear Sectors on MMC
+ //Clear Sectors on MMC
   for (i = 0; i < 512; i++) buffer[i] = 0;
   mmcWriteSector(0, buffer);                // write a 512 Byte big block beginning at the (aligned) adress
 
@@ -110,12 +122,12 @@ int main( void )
 
   mmcReadSector(0, buffer);                 // read a size Byte big block beginning at the address.
   for (i = 0; i < 512; i++) if(buffer[i] != 0) P9OUT |= BIT7;
-  
+
   mmcReadSector(1, buffer);                 // read a size Byte big block beginning at the address.
   for (i = 0; i < 512; i++) if(buffer[i] != 0) P9OUT |= BIT7;
 
 
-// Write Data to MMC  
+// Write Data to MMC
   for (i = 0; i < 512; i++) buffer[i] = i;
   mmcWriteSector(0, buffer);                // write a 512 Byte big block beginning at the (aligned) adress
 
